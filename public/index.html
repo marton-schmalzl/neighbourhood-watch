@@ -119,6 +119,8 @@
 </head>
 <body>
   <form id="incident-form" enctype="multipart/form-data" action="/report" method="POST">
+    <button id="installButton" style="display: none;">App letöltése <span class="optional">(opcionális)</span></button>
+
     <h1>Esemény Jelentése</h1>
 
     <label for="name">Név</label>
@@ -185,6 +187,42 @@
           });
       });
     }
+  </script>
+  <script>
+    let deferredPrompt;  // Variable to store the 'beforeinstallprompt' event
+    const installButton = document.getElementById('installButton');
+  
+    // Listen for the 'beforeinstallprompt' event
+    window.addEventListener('beforeinstallprompt', (event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      event.preventDefault();
+      // Store the event for later use
+      deferredPrompt = event;
+      // Display the install button
+      installButton.style.display = 'block';
+  
+      // Handle the install button click event
+      installButton.addEventListener('click', () => {
+        // Hide the install button
+        installButton.style.display = 'none';
+        // Show the install prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
+        });
+      });
+    });
+  
+    // Optional: Add a listener for app installation
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA installed successfully');
+    });
   </script>
 </body>
 </html>
